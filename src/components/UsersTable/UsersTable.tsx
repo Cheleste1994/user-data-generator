@@ -23,7 +23,7 @@ import {
 } from 'src/store/slice/admin.slice';
 import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 
-const HEADER_TABLE = ['Name', 'Email', 'Last login', 'Status'];
+const HEADER_TABLE = ['Number', 'ID', 'Name', 'Address', 'Phone'];
 
 export default function UsersTable() {
   const { users } = useAppSelector(getUsersState);
@@ -117,7 +117,6 @@ export default function UsersTable() {
         numSelected={checked.length}
         handleDeleteUsers={handleDeleteUsers}
         handleBlockedUsers={handleBlockedUsers}
-        checkedUsers={checkedUsers}
       />
 
       <TableContainer component={Paper} sx={{ width: '100%' }}>

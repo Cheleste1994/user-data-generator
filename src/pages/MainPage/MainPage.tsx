@@ -6,9 +6,11 @@ export default function MainPage() {
     <Box
       sx={{
         padding: {
-          xs: 2,
+          xs: 4,
           lg: 0,
         },
+        width: 1,
+        flex: 1,
       }}
     >
       <UsersTable />

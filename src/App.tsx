@@ -30,7 +30,7 @@ function App() {
             maxWidth="lg"
             disableGutters
             sx={{
-              minHeight: '100vh',
+              minHeight: ['100vh', '100dvh'],
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
