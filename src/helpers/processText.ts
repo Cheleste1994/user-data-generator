@@ -27,7 +27,7 @@ export const processText = (
 
     if (initialText.length / 2 > text.length) {
       errorType = ['add', 'swap'][Math.floor(random() * 2)];
-    } else if (initialText.length * 2 > text.length) {
+    } else if (initialText.length * 1.3 < text.length) {
       errorType = ['delete', 'swap'][Math.floor(random() * 2)];
     }
 
