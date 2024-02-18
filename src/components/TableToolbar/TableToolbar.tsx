@@ -2,8 +2,15 @@ import { Toolbar, Box, Button } from '@mui/material';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import Seed from '../Seed/Seed';
 import Errors from '../Errors/Errors';
+import { useAppSelector } from 'src/store/hooks';
+import { getFakerUsersState } from 'src/store/slice/fakerUsers.slice';
+import { useMemo } from 'react';
 
 export function TableToolbar() {
+  const { errors } = useAppSelector(getFakerUsersState);
+
+  const errorsMemo = useMemo(() => errors, [errors]);
+
   return (
     <Toolbar
       sx={{
@@ -20,7 +27,7 @@ export function TableToolbar() {
         }}
         component="div"
       >
-        <Errors />
+        <Errors errors={errorsMemo} />
         <Seed />
         <Box
           sx={{

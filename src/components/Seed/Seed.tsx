@@ -25,9 +25,6 @@ export default function Seed() {
     const value = Math.trunc(Math.random() * 10000000);
     setSeedValue(value);
     dispatch(setSeed(value));
-
-    const r = Math.random();
-    r.toExponential;
   };
 
   return (

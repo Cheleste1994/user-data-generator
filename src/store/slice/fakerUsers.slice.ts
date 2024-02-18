@@ -15,7 +15,7 @@ export interface UserState {
   index: number;
   username?: string;
   phone?: string;
-  address?: string | string[] | null;
+  address?: string;
 }
 
 export interface FakerUsersState {
@@ -65,6 +65,9 @@ const fakerUsersSlice = createSlice({
         page: 1,
       });
     },
+    setErrors: (state, { payload }: { payload: { errors: number } }) => {
+      state.errors = payload.errors;
+    },
     setLocale: (state, { payload }: { payload: Locale }) => {
       const { seed } = state;
 
@@ -95,7 +98,12 @@ const fakerUsersSlice = createSlice({
 
 export const getFakerUsersState = (state: RootState) => state.fakerUsersReducer;
 
-export const { setFakerUsers, setSeed, setLocale, infinityPaginations } =
-  fakerUsersSlice.actions;
+export const {
+  setFakerUsers,
+  setSeed,
+  setLocale,
+  infinityPaginations,
+  setErrors,
+} = fakerUsersSlice.actions;
 
 export default fakerUsersSlice.reducer;

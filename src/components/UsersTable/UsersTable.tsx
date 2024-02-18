@@ -10,8 +10,9 @@ import {
   Box,
 } from '@mui/material';
 import { memo, useDeferredValue, useState } from 'react';
-import { useAppDispatch } from 'src/store/hooks';
+import { useAppDispatch, useAppSelector } from 'src/store/hooks';
 import {
+  getFakerUsersState,
   infinityPaginations,
   UserState,
 } from 'src/store/slice/fakerUsers.slice';
@@ -25,6 +26,7 @@ import {
 import { TableToolbar } from '../TableToolbar/TableToolbar';
 import LinearProgress from '@mui/material/LinearProgress';
 import styles from './scroll.module.css';
+import { processText } from 'src/helpers/processText';
 
 const HEADER_TABLE = ['Number', 'ID', 'Name', 'Address', 'Phone'];
 
@@ -35,7 +37,22 @@ export default memo(function UsersTable({
   users: UserState[];
   page: number;
 }) {
+  const { errors } = useAppSelector(getFakerUsersState);
   const deferredUsers = useDeferredValue(users);
+
+  const usersError = deferredUsers.map((user, index) => ({
+    ...user,
+    address: processText(
+      user.address || '',
+      errors,
+      deferredUsers[index].address || ''
+    ),
+    username: processText(
+      user.username || '',
+      errors,
+      deferredUsers[index].username || ''
+    ),
+  }));
 
   const dispatch = useAppDispatch();
 
@@ -111,7 +128,7 @@ export default memo(function UsersTable({
             </TableRow>
           </TableHead>
           <TableBody>
-            {deferredUsers.map((user, index) => (
+            {usersError.map((user, index) => (
               <TableRow
                 key={user.uid + index}
                 sx={{
