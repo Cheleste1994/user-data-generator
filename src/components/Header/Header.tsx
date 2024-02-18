@@ -4,17 +4,24 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  SelectChangeEvent,
   Toolbar,
   useScrollTrigger,
 } from '@mui/material';
-import { useState } from 'react';
+import { useAppDispatch, useAppSelector } from 'src/store/hooks';
+import {
+  getFakerUsersState,
+  Locale,
+  LocaleEnum,
+  setLocale,
+} from 'src/store/slice/fakerUsers.slice';
 
 export default function Header() {
-  const [region, setRegion] = useState('');
+  const { locale } = useAppSelector(getFakerUsersState);
 
-  const handleChange = (event: SelectChangeEvent) => {
-    setRegion(event.target.value as string);
+  const dispatch = useAppDispatch();
+
+  const handleClick = (key: Locale) => {
+    dispatch(setLocale(key));
   };
 
   const scrollTrigger = useScrollTrigger({
@@ -34,12 +41,20 @@ export default function Header() {
           <Select
             labelId="demo-simple-select-label"
             id="demo-simple-select"
-            value={region}
+            value={LocaleEnum[locale]}
             label="Region"
-            onChange={handleChange}
           >
-            <MenuItem value={10}>Poland</MenuItem>
-            <MenuItem value={20}>USA</MenuItem>
+            {Object.entries(LocaleEnum).map(([key, value]) => {
+              return (
+                <MenuItem
+                  key={key + value}
+                  value={value}
+                  onClick={() => handleClick(key as Locale)}
+                >
+                  {value}
+                </MenuItem>
+              );
+            })}
           </Select>
         </FormControl>
       </Toolbar>

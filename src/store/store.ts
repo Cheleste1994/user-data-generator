@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
-import adminReducer from './slice/admin.slice';
+import filterReducer from './slice/filter.slice';
+import fakerUsersReducer from './slice/fakerUsers.slice';
 
 export const store = configureStore({
   reducer: {
-    adminReducer,
+    filterReducer,
+    fakerUsersReducer,
   },
 });
 

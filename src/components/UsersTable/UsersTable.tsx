@@ -2,155 +2,94 @@ import {
   TableHead,
   TableRow,
   TableCell,
-  Checkbox,
   TableSortLabel,
   Paper,
   Table,
   TableBody,
   TableContainer,
+  Box,
 } from '@mui/material';
-import { useState } from 'react';
-import { useAppDispatch, useAppSelector } from 'src/store/hooks';
+import { memo, useDeferredValue, useState } from 'react';
+import { useAppDispatch } from 'src/store/hooks';
 import {
-  deleteUsers,
-  getUsersState,
-  sortEmail,
-  sortLastLogin,
-  sortName,
-  sortStatus,
-  updateUser,
+  infinityPaginations,
   UserState,
-} from 'src/store/slice/admin.slice';
-import { EnhancedTableToolbar } from './EnhancedTableToolbar';
+} from 'src/store/slice/fakerUsers.slice';
+import {
+  sortAddress,
+  sortID,
+  sortName,
+  sortNumber,
+  sortPhone,
+} from 'src/store/slice/filter.slice';
+import { TableToolbar } from '../TableToolbar/TableToolbar';
+import LinearProgress from '@mui/material/LinearProgress';
+import styles from './scroll.module.css';
 
 const HEADER_TABLE = ['Number', 'ID', 'Name', 'Address', 'Phone'];
 
-export default function UsersTable() {
-  const { users } = useAppSelector(getUsersState);
+export default memo(function UsersTable({
+  users,
+  page,
+}: {
+  users: UserState[];
+  page: number;
+}) {
+  const deferredUsers = useDeferredValue(users);
+
+  const dispatch = useAppDispatch();
 
   const [sort, setSort] = useState<{
     index: number;
     order: 'asc' | 'desc';
   }>({ index: 0, order: 'asc' });
 
-  const [checkedUsers, setCheckedUsers] = useState<{ [key: string]: boolean }>(
-    {}
-  );
-
-  const checked = Object.keys(checkedUsers);
-
-  const dispatch = useAppDispatch();
-
   const handleSort = (index: number) => {
     const orderBy = sort.order === 'asc' ? 'desc' : 'asc';
 
     switch (HEADER_TABLE[index]) {
+      case 'Number':
+        dispatch(sortNumber(orderBy));
+        break;
+      case 'ID':
+        dispatch(sortID(orderBy));
+        break;
       case 'Name':
         dispatch(sortName(orderBy));
         break;
-      case 'Email':
-        dispatch(sortEmail(orderBy));
+      case 'Address':
+        dispatch(sortAddress(orderBy));
         break;
-      case 'Last login':
-        dispatch(sortLastLogin(orderBy));
-        break;
-      case 'Status':
-        dispatch(sortStatus(orderBy));
+      case 'Phone':
+        dispatch(sortPhone(orderBy));
         break;
       default:
     }
-
     setSort({ index, order: orderBy });
   };
 
-  const handleDeleteUsers = async () => {
-    await dispatch(deleteUsers(checked));
-
-    setCheckedUsers((state) => {
-      const newState = { ...state };
-      checked.forEach((uid) => {
-        delete newState[uid];
-      });
-      return newState;
-    });
-  };
-
-  const handleBlockedUsers = async (isBlock: boolean) => {
-    for (const [uid] of Object.entries(checkedUsers)) {
-      if (isBlock) {
-        const result = await dispatch(updateUser({ uid, disabled: true }));
-
-        setCheckedUsers((state) => ({
-          ...state,
-          [(result.payload as UserState).uid]: (result.payload as UserState)
-            .disabled,
-        }));
-      }
-
-      if (!isBlock) {
-        const result = await dispatch(updateUser({ uid, disabled: false }));
-
-        setCheckedUsers((state) => ({
-          ...state,
-          [(result.payload as UserState).uid]: (result.payload as UserState)
-            .disabled,
-        }));
+  const handleScroll = (event: React.UIEvent<HTMLDivElement, UIEvent>) => {
+    if (event.target) {
+      const { scrollTop, offsetHeight, scrollHeight } =
+        event.target as HTMLElement;
+      if (scrollTop + offsetHeight + 2 >= scrollHeight) {
+        dispatch(infinityPaginations(page + 1));
       }
     }
-  };
-
-  const handleChecked = (user: UserState) => {
-    setCheckedUsers((state) => {
-      if (Object.keys(state).includes(user.uid)) {
-        const newState = { ...state };
-        delete newState[user.uid];
-        return newState;
-      }
-
-      return { ...state, [user.uid]: user.disabled };
-    });
   };
 
   return (
     <>
-      <EnhancedTableToolbar
-        numSelected={checked.length}
-        handleDeleteUsers={handleDeleteUsers}
-        handleBlockedUsers={handleBlockedUsers}
-      />
-
-      <TableContainer component={Paper} sx={{ width: '100%' }}>
+      <TableToolbar />
+      <TableContainer
+        component={Paper}
+        sx={{ width: '100%', height: '700px' }}
+        onScroll={handleScroll}
+        className={styles.scroll}
+      >
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  indeterminate={
-                    checked.length < users.length && checked.length > 0
-                  }
-                  checked={
-                    checked.length === users.length && checked.length > 0
-                  }
-                  color="primary"
-                  inputProps={{
-                    'aria-label': 'select all desserts',
-                  }}
-                  onClick={() => {
-                    if (checked.length === users.length) {
-                      setCheckedUsers({});
-                    } else {
-                      const checkedUsersObject = users.reduce(
-                        (acc, user) => {
-                          acc[user.uid] = user.disabled;
-                          return acc;
-                        },
-                        {} as { [key: string]: boolean }
-                      );
-                      setCheckedUsers(checkedUsersObject);
-                    }
-                  }}
-                />
-              </TableCell>
               {HEADER_TABLE.map((title, index) => (
                 <TableCell
                   key={index + title}
@@ -172,38 +111,37 @@ export default function UsersTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {users.map((user) => (
+            {deferredUsers.map((user, index) => (
               <TableRow
-                key={user.uid}
-                role="checkbox"
+                key={user.uid + index}
                 sx={{
                   '&:last-child td, &:last-child th': { border: 0 },
                 }}
               >
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    color="error"
-                    checked={checked.includes(user.uid)}
-                    onClick={() => handleChecked(user)}
-                  />
+                <TableCell component="th" scope="row" align="center">
+                  {user.index + 1}
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  {user.displayName}
+                  {user.uid}
                 </TableCell>
-                <TableCell component="th" scope="row">
-                  {user.email}
-                </TableCell>
-                <TableCell align="center">
-                  {user.metadata.lastSignInTime}
-                </TableCell>
-                <TableCell align="left">
-                  {user.disabled ? 'Blocked' : 'Active'}
-                </TableCell>
+                <TableCell align="center">{user.username}</TableCell>
+                <TableCell align="center">{user.address}</TableCell>
+                <TableCell align="left">{`${user.phone}`}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+        <Box
+          sx={{
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+          }}
+        >
+          <LinearProgress />
+        </Box>
       </TableContainer>
     </>
   );
-}
+});
