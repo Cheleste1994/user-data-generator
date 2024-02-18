@@ -3,13 +3,24 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import Seed from '../Seed/Seed';
 import Errors from '../Errors/Errors';
 import { useAppSelector } from 'src/store/hooks';
-import { getFakerUsersState } from 'src/store/slice/fakerUsers.slice';
+import {
+  getFakerUsersState,
+  UserState,
+} from 'src/store/slice/fakerUsers.slice';
 import { useMemo } from 'react';
+import { saveAs } from 'file-saver';
+import Papa from 'papaparse';
 
-export function TableToolbar() {
+export function TableToolbar({ users }: { users: UserState[] }) {
   const { errors } = useAppSelector(getFakerUsersState);
 
   const errorsMemo = useMemo(() => errors, [errors]);
+
+  const handleClickExport = () => {
+    const csvData = Papa.unparse(users, { delimiter: ';' });
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8' });
+    saveAs(blob, 'export.csv');
+  };
 
   return (
     <Toolbar
@@ -41,6 +52,7 @@ export function TableToolbar() {
             variant="contained"
             endIcon={<FileDownloadIcon />}
             size="small"
+            onClick={handleClickExport}
           >
             Export
           </Button>

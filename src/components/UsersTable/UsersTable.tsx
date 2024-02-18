@@ -97,7 +97,7 @@ export default memo(function UsersTable({
 
   return (
     <>
-      <TableToolbar />
+      <TableToolbar users={usersError} />
       <TableContainer
         component={Paper}
         sx={{ width: '100%', height: '700px' }}

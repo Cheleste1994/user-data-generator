@@ -11,8 +11,8 @@ export enum LocaleEnum {
 export type Locale = keyof typeof LocaleEnum;
 
 export interface UserState {
-  uid: string;
   index: number;
+  uid: string;
   username?: string;
   phone?: string;
   address?: string;
